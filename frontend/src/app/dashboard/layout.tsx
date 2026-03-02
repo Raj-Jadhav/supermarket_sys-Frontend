@@ -4,6 +4,8 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
+import Sidebar from '@/components/Sidebar';
+import ProfileDropdown from '@/components/ProfileDropdown';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -32,7 +34,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Navbar */}
-      <nav className="bg-white border-b shadow-sm">
+      <nav className="bg-white border-b shadow-sm sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center space-x-8">
@@ -62,29 +64,21 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                {user?.first_name || user?.username}
-                {user?.roles[0] && (
-                  <span className="ml-2 px-2 py-0.5 bg-brand-100 text-brand-700 rounded-full text-xs">
-                    {user.roles[0].role}
-                  </span>
-                )}
-              </span>
-              <button
-                onClick={() => { logout(); router.push('/login'); }}
-                className="text-sm text-red-600 hover:text-red-700 font-medium"
-              >
-                Logout
-              </button>
+              <ProfileDropdown />
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+      {/* Main Content with Sidebar */}
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 overflow-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

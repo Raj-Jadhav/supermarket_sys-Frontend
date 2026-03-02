@@ -11,6 +11,11 @@ export default function StoresPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Add store form
+  const [showStoreForm, setShowStoreForm] = useState(false);
+  const [storeForm, setStoreForm] = useState({ name: '', location: '' });
+  const [storeFormError, setStoreFormError] = useState('');
+
   // Add aisle form
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ number: '', name: '', allowed_categories: [] as number[] });
@@ -60,11 +65,66 @@ export default function StoresPage() {
     }
   };
 
+  const handleCreateStore = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setStoreFormError('');
+    try {
+      const newStore = await api.post('/stores/', {
+        name: storeForm.name,
+        location: storeForm.location,
+      });
+      setStores([...stores, newStore.data]);
+      setShowStoreForm(false);
+      setStoreForm({ name: '', location: '' });
+      setSelectedStore(newStore.data.id);
+    } catch (err: any) {
+      setStoreFormError(err.response?.data?.error || 'Failed to create store');
+    }
+  };
+
   if (loading) return <div className="text-center py-12">Loading stores...</div>;
 
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold">Stores & Aisles</h1>
+
+      {/* Create Store Button */}
+      <button onClick={() => setShowStoreForm(!showStoreForm)}
+        className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium">
+        + Create New Store
+      </button>
+
+      {showStoreForm && (
+        <form onSubmit={handleCreateStore} className="bg-white rounded-xl border p-6 space-y-4">
+          <h2 className="text-lg font-semibold">Create New Store</h2>
+          {storeFormError && <div className="text-red-600 text-sm">{storeFormError}</div>}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Store Name</label>
+              <input type="text" value={storeForm.name}
+                onChange={(e) => setStoreForm({ ...storeForm, name: e.target.value })}
+                required className="w-full px-3 py-2 border rounded-lg"
+                placeholder="e.g. Downtown Store, Mall Branch" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Location</label>
+              <input type="text" value={storeForm.location}
+                onChange={(e) => setStoreForm({ ...storeForm, location: e.target.value })}
+                required className="w-full px-3 py-2 border rounded-lg"
+                placeholder="e.g. 123 Main St" />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button type="submit" className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium">
+              Create Store
+            </button>
+            <button type="button" onClick={() => setShowStoreForm(false)}
+              className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">
+              Cancel
+            </button>
+          </div>
+        </form>
+      )}
 
       {/* Store Selector */}
       <div className="flex gap-3">
